@@ -5,7 +5,7 @@ import tensorflow as tf
 import numpy as np
 import matplotlib.pyplot as plt
 print(tf.version.VERSION)
-from model_utils import save_model
+# from model_utils import save_model
 
 # %%
 model = tf.keras.models.Sequential([
@@ -21,7 +21,6 @@ model.compile(optimizer=tf.keras.optimizers.Adam(learning_rate=1e-3),
 # %%
 batch_size, input_lenght, input_dim = 1, 8192, 1
 x =  np.random.uniform(-1, 1, input_lenght).astype(np.float32)
-# x = np.linspace(-1, 1, input_lenght)
 # Shuffle the values to guarantee they're not in order
 np.random.shuffle(x)
 
@@ -51,12 +50,6 @@ plt.plot(x_test, y_test, 'r.', label="Test")
 plt.plot(x_validate, y_validate, 'y.', label="Validate")
 plt.legend()
 
-# x_train = tf.convert_to_tensor(x_train.reshape(-1, 1), dtype=tf.float32)
-# y_train = tf.convert_to_tensor(y_train.reshape(-1, 1), dtype=tf.float32)
-# x_test = tf.convert_to_tensor(x_test.reshape(-1, 1), dtype=tf.float32)
-# y_test = tf.convert_to_tensor(y_test.reshape(-1, 1), dtype=tf.float32)
-# x_validate = tf.convert_to_tensor(x_validate.reshape(-1, 1), dtype=tf.float32)
-# y_validate = tf.convert_to_tensor(y_validate.reshape(-1, 1), dtype=tf.float32)
 # %% Train
 history = model.fit(x_train, y_train, batch_size=128, epochs=500, verbose=0,
                     validation_data=(x_validate, y_validate), shuffle=True)
@@ -69,8 +62,9 @@ model.summary()
 y_test_pred = model.predict(x_test)
 
 plt.scatter(x_test, y_test_pred, label="Test")
-plt.scatter(x_test, y_test, label="Test1")
+plt.scatter(x_test, y_test, label="GT")
 plt.legend()
+plt.savefig("mlp1024_tf.png")
 
 # %%
 
@@ -115,4 +109,5 @@ with open('mlp1024.tflite', 'wb') as f:
 # %%
 
 # Save model for RTNeural
-save_model(model, 'mlp_rtneural.json')
+# save_model(model, 'mlp_rtneural.json')
+# %%
