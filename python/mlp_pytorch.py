@@ -49,13 +49,13 @@ with torch.no_grad():
     test_output = model(test_input)
 
 
-# Plot the data in each partition in different colors:
+# %% Plot the data in each partition in different colors:
 plt.plot(test_input, test_output.cpu(), 'b.', label="Train")
 plt.plot(test_input, test_target, 'r.', label="GT")
 plt.legend()
-plt.save('mlp1024_pytorch.png')
+plt.savefig('mlp1024_pytorch.png')
 
-# set the model to inference mode
+# %% Set the model to inference mode
 model.eval()
 model_name = f"mlp{eval_lenght}.onnx"
 # Export the model
