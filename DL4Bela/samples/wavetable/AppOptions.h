@@ -4,7 +4,7 @@
 
 struct AppOptions
 {
-	std::string modelPath = "";
+    std::string modelPath = "";
     int frontend = 0;
-	bool useArmnn = false;
+    bool useArmnn = false;
 };

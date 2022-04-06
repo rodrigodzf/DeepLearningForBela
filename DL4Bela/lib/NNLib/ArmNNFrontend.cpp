@@ -23,11 +23,10 @@ bool ArmNNFrontend::load(const std::string &filename)
     auto extension = fs::path(filename).extension();
     bool isTFLite = false;
     if (extension == ".tflite")
-    {   
+    {
         isTFLite = true;
     }
 
-    // auto network = mParser->CreateNetworkFromBinaryFile(filename, inputShapes, requestedOutputs);
     armnn::INetworkPtr network = INetwork::Create();
 
     // Construct ArmNN network
@@ -112,7 +111,7 @@ bool ArmNNFrontend::load(const std::string &filename)
 }
 
 bool ArmNNFrontend::process(const std::vector<float> &inputData,
-                          std::vector<float> &outResults)
+                            std::vector<float> &outResults)
 {
 
     mInputTensors = MakeInputTensors(mInputBindingInfo, inputData.data());
