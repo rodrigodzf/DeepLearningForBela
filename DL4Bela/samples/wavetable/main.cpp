@@ -16,6 +16,7 @@
 #include <Bela.h>
 
 #include "AppOptions.h"
+#include "Log.h"
 
 // Handle Ctrl-C by requesting that the audio rendering stop
 void interrupt_handler(int var)
@@ -45,7 +46,8 @@ int main(int argc, char *argv[])
         {
             {"help", 0, NULL, 'h'},
             {"model", 1, NULL, 'm'},
-            {"frontend", 0, NULL, 'f'},
+            {"frontend", 1, NULL, 'f'},
+            {"wavetable", 1, NULL, 'w'},
             {NULL, 0, NULL, 0}};
 
     // Set default settings
@@ -61,7 +63,7 @@ int main(int argc, char *argv[])
     AppOptions opts;
     while (1)
     {
-        int c = Bela_getopt_long(argc, argv, "hm:f:", customOptions, settings);
+        int c = Bela_getopt_long(argc, argv, "hm:f:w:", customOptions, settings);
         if (c < 0)
         {
             break;
@@ -77,7 +79,10 @@ int main(int argc, char *argv[])
             opts.modelPath = (char *)optarg;
             break;
         case 'f':
-            opts.frontend = (int)optarg;
+            opts.frontend = atoi(optarg);
+            break;
+        case 'w':
+            opts.wavetableSize = atoi(optarg);
             break;
         default:
             usage(basename(argv[0]));

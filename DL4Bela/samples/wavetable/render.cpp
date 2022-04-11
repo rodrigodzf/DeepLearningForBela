@@ -43,17 +43,17 @@ bool setup(BelaContext *context, void *userData)
 {
     AppOptions *opts = reinterpret_cast<AppOptions *>(userData);
 
-    std::cout << "Frame size: " << context->audioFrames << std::endl;
-    std::cout << "Sample rate: " << context->audioSampleRate << std::endl;
+    LOG(INFO) << "Block size: " << context->audioFrames;
+    LOG(INFO) << "Sample rate: " << context->audioSampleRate;
+    LOG(INFO) << "Wavetable size: " << opts->wavetableSize;
 
     std::vector<float> wavetable;
-    const unsigned int wavetableSize = 1024;
-    wavetable.resize(wavetableSize);
+    wavetable.resize(opts->wavetableSize);
 
     // Generate a sawtooth wavetable (a ramp from -1 to 1)
-    for (unsigned int n = 0; n < wavetableSize; n++)
+    for (unsigned int n = 0; n < opts->wavetableSize; n++)
     {
-        wavetable[n] = -1.0 + 2.0 * (float)n / (float)(wavetableSize - 1);
+        wavetable[n] = (float)n / (float)(opts->wavetableSize - 1);
     }
     // Initialise the sawtooth wavetable, passing the sample rate and the buffer
     gSawtoothOscillator.setup(context->audioSampleRate, wavetable);
