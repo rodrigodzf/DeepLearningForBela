@@ -36,8 +36,8 @@ find_library(MATHNEON_LIB REQUIRED
 )
 
 set(ENABLE_TFLITE_FRONTEND ON CACHE BOOL "ENABLE_TFLITE_FRONTEND" FORCE)
-set(ENABLE_ARMNN_FRONTEND ON CACHE BOOL "ENABLE_ARMNN_FRONTEND" FORCE)
-set(ENABLE_RTNEURAL_FRONTEND OFF CACHE BOOL "ENABLE_RTNEURAL_FRONTEND" FORCE)
+# set(ENABLE_ARMNN_FRONTEND ON CACHE BOOL "ENABLE_ARMNN_FRONTEND" FORCE)
+# set(ENABLE_RTNEURAL_FRONTEND ON CACHE BOOL "ENABLE_RTNEURAL_FRONTEND" FORCE)
 
 if(ENABLE_TFLITE_FRONTEND)
     add_compile_definitions(ENABLE_TFLITE_FRONTEND)
@@ -48,8 +48,30 @@ if(ENABLE_ARMNN_FRONTEND)
 endif()
 
 if(ENABLE_RTNEURAL_FRONTEND)
+    include(ExternalProject)
+    ExternalProject_Add(RTNeuralBuild
+        GIT_REPOSITORY    git@github.com:jatinchowdhury18/RTNeural.git
+        GIT_TAG           origin/main
+        INSTALL_COMMAND   ""
+        UPDATE_COMMAND    ""
+        LOG_BUILD         ON
+    )
+
+    ExternalProject_Get_property(RTNeuralBuild SOURCE_DIR INSTALL_DIR BINARY_DIR)
     add_compile_definitions(ENABLE_RTNEURAL_FRONTEND)
+    add_compile_definitions(RTNEURAL_DYNAMIC)
+    
+    add_library(RTNeural STATIC IMPORTED GLOBAL)
+
+    set_target_properties(RTNeural PROPERTIES IMPORTED_LOCATION ${BINARY_DIR}/RTNeural/libRTNeural.a)
+    set(RTNEURAL_INCLUDE_DIR ${SOURCE_DIR})
+    # set_target_properties(RTNeural PROPERTIES INTERFACE_INCLUDE_DIRECTORIES ${SOURCE_DIR})
+    # target_include_directories(RTNeural INTERFACE ${SOURCE_DIR})
+
+    add_dependencies(RTNeural RTNeuralBuild)
+
 endif()
+
 
 add_subdirectory(DL4Bela/lib/Utils)
 add_subdirectory(DL4Bela/lib/NNLib)
@@ -57,12 +79,6 @@ add_subdirectory(DL4Bela/lib/NNLib)
 add_subdirectory(DL4Bela/samples/wavetable)
 add_subdirectory(DL4Bela/samples/benchmark)
 
-# add_subdirectory(Utils)
-# add_subdirectory(NNLib)
-# add_subdirectory(simpleRTNeural)
-# add_subdirectory(final_project)
-# add_subdirectory(test_tflite_delegate)
-# add_subdirectory(test_onnx)
-# add_subdirectory(test_tflite)
-# add_subdirectory(assignment2)
-# add_subdirectory(midi-sinetone)
+if(ENABLE_ARMNN_FRONTEND)
+    add_subdirectory(DL4Bela/samples/keyword)
+endif()
