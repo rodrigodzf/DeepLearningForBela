@@ -14,6 +14,7 @@
 #include <memory>
 
 #include "BaseNN.h"
+#include <tensorflow/lite/interpreter.h>
 
 // Fwd
 namespace tflite
@@ -37,6 +38,23 @@ public:
     ~TFLiteFrontend();
 
     bool load(const std::string &filename) override;
-    inline bool process(const std::vector<float> &inputData,
-                        std::vector<float> &outResults) override final;
+
+    template <typename T>
+    bool process(const std::vector<T> &inputData,
+                 std::vector<T> &outResults)
+    {
+        // Get pointer to the tensors
+        T *input_buffer = m_interpreter->typed_input_tensor<T>(0);
+        T *output_buffer = m_interpreter->typed_output_tensor<T>(0);
+
+        // Copy input data to tensor
+        std::copy(inputData.begin(), inputData.end(), input_buffer);
+
+        m_interpreter->Invoke();
+
+        // Copy tensor data to the output
+        std::copy(output_buffer, output_buffer + outResults.size(), outResults.begin());
+
+        return true;
+    }
 };

@@ -15,6 +15,7 @@
 #include <armnn/Descriptors.hpp>
 
 #include "BaseNN.h"
+#include "Log.h"
 
 class ArmNNFrontend : public BaseNN
 {
@@ -26,7 +27,8 @@ private:
     armnn::BindingPointInfo mInputBindingInfo;
     armnn::BindingPointInfo mOutputBindingInfo;
 
-    std::vector<float> mOutputBuffer;
+    // ! TODO template
+    std::vector<int8_t> mOutputBuffer;
 
 private:
     // Helper function to make input tensors
@@ -46,10 +48,43 @@ private:
     }
 
 public:
+    float getQuantizationScale()
+    {
+        return mInputBindingInfo.second.GetQuantizationScale();
+    }
+
+    int getQuantizationOffset()
+    {
+        return mInputBindingInfo.second.GetQuantizationOffset();
+    }
+
+public:
     ArmNNFrontend();
     ~ArmNNFrontend();
 
     bool load(const std::string &filename) override;
-    inline bool process(const std::vector<float> &inputData,
-                        std::vector<float> &outResults) override final;
+    // inline bool process(const std::vector<float> &inputData,
+                        // std::vector<float> &outResults) override final;
+    
+    template <typename T>
+    inline bool process(const std::vector<T> &inputData,
+                        std::vector<T> &outResults)
+    {
+
+        mInputTensors = MakeInputTensors(mInputBindingInfo, inputData.data());
+        mOutputTensors = MakeOutputTensors(mOutputBindingInfo, outResults.data());
+
+        // enqueue workload
+        auto ret = mRuntime->EnqueueWorkload(mNetworkIdentifier,
+                                            mInputTensors,
+                                            mOutputTensors);
+
+        if (ret == armnn::Status::Failure)
+        {
+            LOG(ERROR) << "Failed to perform inference.";
+            return false;
+        }
+
+        return true;
+    }
 };

@@ -3,6 +3,7 @@
 #include <fstream>
 #include <memory>
 #include <iomanip>
+#include <chrono>
 
 #include "Utils.h"
 #include "argparse.h"
@@ -10,11 +11,9 @@
 
 #if defined(ENABLE_TFLITE_FRONTEND)
 #include "TFLiteFrontend.h"
-#endif
-#if defined(ENABLE_ARMNN_FRONTEND)
+#elif defined(ENABLE_ARMNN_FRONTEND)
 #include "ArmNNFrontend.h"
-#endif
-#if defined(ENABLE_RTNEURAL_FRONTEND)
+#elif defined(ENABLE_RTNEURAL_FRONTEND)
 #include "RTNeuralFrontend.h"
 #endif
 
@@ -65,35 +64,20 @@ int main(int argc, char *argv[])
     LOG(INFO) << "Model name " << modelName;
     LOG(INFO) << "Sequence lenght " << sequenceLenght;
 
-    std::unique_ptr<BaseNN> nn;
-
-    switch (frontend)
-    {
-    case 0:
 #if defined(ENABLE_TFLITE_FRONTEND)
-        LOG(INFO) << "Creating TFLite pipeline";
-        if (useTFLiteArmNNDelegate)
-        {
-            LOG(INFO) << "With ArmNN delegate";
-        }
-        nn = std::make_unique<TFLiteFrontend>(useTFLiteArmNNDelegate);
-#endif
-        break;
-    case 1:
-#if defined(ENABLE_ARMNN_FRONTEND)
-        LOG(INFO) << "Creating ArmNN pipeline";
-        nn = std::make_unique<ArmNNFrontend>();
-#endif
-        break;
-    case 2:
-#if defined(ENABLE_RTNEURAL_FRONTEND)
-        LOG(INFO) << "Creating RTNeural pipeline";
-        nn = std::make_unique<RTNeuralFrontend>();
-#endif
-        break;
-    default:
-        break;
+    LOG(INFO) << "Creating TFLite pipeline";
+    if (useTFLiteArmNNDelegate)
+    {
+        LOG(INFO) << "With ArmNN delegate";
     }
+    auto nn = std::make_unique<TFLiteFrontend>(useTFLiteArmNNDelegate);
+#elif defined(ENABLE_ARMNN_FRONTEND)
+    LOG(INFO) << "Creating ArmNN pipeline";
+    auto nn = std::make_unique<ArmNNFrontend>();
+#elif defined(ENABLE_RTNEURAL_FRONTEND)
+    LOG(INFO) << "Creating RTNeural pipeline";
+    auto nn = std::make_unique<RTNeuralFrontend>();
+#endif
 
     if (!nn)
     {

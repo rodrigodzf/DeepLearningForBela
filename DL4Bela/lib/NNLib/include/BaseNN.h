@@ -19,5 +19,5 @@ public:
     virtual ~BaseNN(){};
 
     virtual bool load(const std::string &filename) = 0;
-    virtual inline bool process(const std::vector<float> &inputData, std::vector<float> &outResults) = 0;
+    // virtual inline bool process(const std::vector<float> &inputData, std::vector<float> &outResults) = 0;
 };

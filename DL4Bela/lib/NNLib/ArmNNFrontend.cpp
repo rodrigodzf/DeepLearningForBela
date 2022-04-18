@@ -3,7 +3,6 @@
 #include <filesystem>
 #include "ArmNNFrontend.h"
 #include "Utils.h"
-#include "Log.h"
 
 using namespace armnn;
 namespace fs = std::filesystem;
@@ -33,7 +32,10 @@ bool ArmNNFrontend::load(const std::string &filename)
     if (isTFLite)
     {
         LOG(INFO) << "Loading TFLite Model " << filename;
-        auto parser = armnnTfLiteParser::ITfLiteParser::Create();
+        armnnTfLiteParser::ITfLiteParser::TfLiteParserOptions tfLiteParserOptions;
+        tfLiteParserOptions.m_InferAndValidate = true;
+
+        auto parser = armnnTfLiteParser::ITfLiteParser::Create(tfLiteParserOptions);
         network = parser->CreateNetworkFromBinaryFile(filename.c_str());
         LOG(INFO) << "Loaded: " << filename;
 
@@ -50,8 +52,12 @@ bool ArmNNFrontend::load(const std::string &filename)
         }
 
         // Find the binding points for the input and output nodes
-        auto inputBindingInfo = parser->GetNetworkInputBindingInfo(0, inputTensorNames[0]);
-        auto outputBindingInfo = parser->GetNetworkOutputBindingInfo(0, outputTensorNames[0]);
+        mInputBindingInfo = parser->GetNetworkInputBindingInfo(0, inputTensorNames[0]);
+        mOutputBindingInfo = parser->GetNetworkOutputBindingInfo(0, outputTensorNames[0]);
+
+        LOG(INFO) << "Input shape " << mInputBindingInfo.second.GetShape();
+        LOG(INFO) << "Output shape " << mOutputBindingInfo.second.GetShape();
+
         LOG(INFO) << "Binding points set";
     }
     else
@@ -70,11 +76,17 @@ bool ArmNNFrontend::load(const std::string &filename)
 
     // Optimize the network for a specific runtime compute device, e.g. CpuAcc, GpuAcc
     IRuntime::CreationOptions options;
+    auto optimizerOptions = armnn::OptimizerOptions();
+    optimizerOptions.m_shapeInferenceMethod = armnn::ShapeInferenceMethod::InferAndValidate;
+
     // runtime(IRuntime::Create(options));
     armnn::IOptimizedNetworkPtr optNet(nullptr, nullptr);
     try
     {
-        optNet = armnn::Optimize(*network, {armnn::Compute::CpuAcc}, mRuntime->GetDeviceSpec());
+        optNet = armnn::Optimize(*network,
+                                 {armnn::Compute::CpuAcc},
+                                 mRuntime->GetDeviceSpec(),
+                                 optimizerOptions);
     }
     catch (std::exception &ex)
     {
@@ -104,29 +116,8 @@ bool ArmNNFrontend::load(const std::string &filename)
     LOG(INFO) << "Network loaded";
 
     // pre-allocate memory for output (the size of it never changes)
-    mOutputBuffer.assign(mOutputBindingInfo.second.GetNumElements(), 0);
-    mOutputTensors = MakeOutputTensors(mOutputBindingInfo, mOutputBuffer.data());
+    // mOutputBuffer.assign(mOutputBindingInfo.second.GetNumElements(), 0);
+    // mOutputTensors = MakeOutputTensors(mOutputBindingInfo, mOutputBuffer.data());
 
-    return true;
-}
-
-bool ArmNNFrontend::process(const std::vector<float> &inputData,
-                            std::vector<float> &outResults)
-{
-
-    mInputTensors = MakeInputTensors(mInputBindingInfo, inputData.data());
-
-    // enqueue workload
-    Status ret = mRuntime->EnqueueWorkload(mNetworkIdentifier,
-                                           mInputTensors,
-                                           mOutputTensors);
-
-    if (ret == Status::Failure)
-    {
-        LOG(ERROR) << "Failed to perform inference.";
-        return false;
-    }
-
-    outResults = mOutputBuffer;
     return true;
 }

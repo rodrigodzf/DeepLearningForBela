@@ -8,6 +8,10 @@ if (ENABLE_ARMNN_FRONTEND)
     list(APPEND SRC_FILES ArmNNFrontend.cpp)
 endif()
 
+if (ENABLE_RTNEURAL_FRONTEND)
+    list(APPEND SRC_FILES RTNeuralFrontend.cpp)
+endif()
+
 add_library(${LIB_NAME} ${SRC_FILES})
 
 if (ENABLE_TFLITE_FRONTEND)
@@ -38,19 +42,22 @@ endif()
 if (ENABLE_ARMNN_FRONTEND)
     target_link_directories(${LIB_NAME} PUBLIC /opt/armnn-dist/armnn/lib)
     target_include_directories(${LIB_NAME} PUBLIC /opt/armnn-dist/armnn/include)
-    target_include_directories(${LIB_NAME} PUBLIC /opt/armnn-dist/armnn/delegate/include)
 endif()
 
 target_include_directories(${LIB_NAME} PUBLIC include/)
 # target_compile_definitions(${LIB_NAME} PRIVATE RTNEURAL_STATIC)
 
 if (ENABLE_TFLITE_FRONTEND)
+    target_link_directories(${LIB_NAME} PUBLIC /opt/armnn-dist/armnn/lib)
+    target_include_directories(${LIB_NAME} PUBLIC /opt/armnn-dist/armnn/include)
+    target_include_directories(${LIB_NAME} PUBLIC /opt/armnn-dist/armnn/delegate/include)
     target_link_libraries(${LIB_NAME}
                         PUBLIC
                         tflite_headers
                         flatbuffer_headers
                         ${TfLite_LIB}
                         ${Flatbuffers_LIB}
+                        armnn
                         armnnDelegate
                         protobuf
                         dl
@@ -63,11 +70,14 @@ if (ENABLE_ARMNN_FRONTEND)
                         armnn
                         armnnOnnxParser
                         armnnTfLiteParser
-                        Utils
+                        protobuf
+                        pthread
                         )
 endif()
 
 if (ENABLE_RTNEURAL_FRONTEND)
+    message(WARNING "INCLUDE IS  ${RTNEURAL_INCLUDE_DIR}")
+    target_include_directories(${LIB_NAME} PUBLIC ${RTNEURAL_INCLUDE_DIR})
     target_link_libraries(${LIB_NAME}
                         PRIVATE
                         RTNeural)

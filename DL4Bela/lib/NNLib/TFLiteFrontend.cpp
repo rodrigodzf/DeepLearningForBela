@@ -2,7 +2,6 @@
 
 #include <armnn_delegate.hpp>
 #include <tensorflow/lite/kernels/builtin_op_kernels.h>
-#include <tensorflow/lite/interpreter.h>
 #include <tensorflow/lite/kernels/register.h>
 #include <tensorflow/lite/optional_debug_tools.h>
 #include "Log.h"
@@ -81,20 +80,3 @@ bool TFLiteFrontend::load(const std::string &filename)
     return true;
 }
 
-bool TFLiteFrontend::process(const std::vector<float> &inputData,
-                             std::vector<float> &outResults)
-{
-    // Get pointer to the tensors
-    float *input_buffer = m_interpreter->typed_input_tensor<float>(0);
-    float *output_buffer = m_interpreter->typed_output_tensor<float>(0);
-
-    // Copy input data to tensor
-    std::copy(inputData.begin(), inputData.end(), input_buffer);
-
-    m_interpreter->Invoke();
-
-    // Copy tensor data to the output
-    std::copy(output_buffer, output_buffer + outResults.size(), outResults.begin());
-
-    return true;
-}
