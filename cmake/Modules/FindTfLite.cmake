@@ -34,12 +34,19 @@ if (TfLite_LIB MATCHES .a$)
                  ${TFLITE_LIB_ROOT}/_deps/ruy-build)
     find_library(TfLite_flatbuffers_LIB "libflatbuffers.a"
                  PATH ${TFLITE_LIB_ROOT}/_deps/flatbuffers-build)
-
+    find_library(TfLite_xnnpack_LIB "libXNNPACK.a"
+                 PATH ${TFLITE_LIB_ROOT}/_deps/xnnpack-build)
+    find_library(TfLite_cpuinfo_LIB "libcpuinfo.a"
+                 PATH ${TFLITE_LIB_ROOT}/cpuinfo)
+    find_library(TfLite_pthreadpool_LIB "libpthreadpool.a"
+                 PATH ${TFLITE_LIB_ROOT}/pthreadpool)
+    find_library(TfLite_clog_LIB "libclog.a"
+                 PATH ${TFLITE_LIB_ROOT}/clog)
     ## Set TFLITE_FOUND if all libraries are satisfied for static lib
-    find_package_handle_standard_args(TfLite DEFAULT_MSG TfLite_LIB TfLite_abseilstrings_LIB TfLite_ruy_LIB TfLite_fftsg_LIB TfLite_fftsg2d_LIB TfLite_farmhash_LIB TfLite_flatbuffers_LIB)
+    find_package_handle_standard_args(TfLite DEFAULT_MSG TfLite_LIB TfLite_abseilstrings_LIB TfLite_ruy_LIB TfLite_fftsg_LIB TfLite_fftsg2d_LIB TfLite_farmhash_LIB TfLite_flatbuffers_LIB TfLite_xnnpack_LIB TfLite_cpuinfo_LIB TfLite_pthreadpool_LIB TfLite_clog_LIB)
     # Set external variables for usage in CMakeLists.txt
     if (TFLITE_FOUND)
-        set(TfLite_LIB ${TfLite_LIB} ${TfLite_abseilstrings_LIB} ${TfLite_ruy_LIB} ${TfLite_fftsg_LIB} ${TfLite_fftsg2d_LIB} ${TfLite_farmhash_LIB} ${TfLite_flatbuffers_LIB})
+        set(TfLite_LIB ${TfLite_LIB} ${TfLite_abseilstrings_LIB} ${TfLite_ruy_LIB} ${TfLite_fftsg_LIB} ${TfLite_fftsg2d_LIB} ${TfLite_farmhash_LIB} ${TfLite_flatbuffers_LIB} ${TfLite_xnnpack_LIB} ${TfLite_cpuinfo_LIB} ${TfLite_pthreadpool_LIB} ${TfLite_clog_LIB})
     endif ()
 elseif (TfLite_LIB MATCHES .so$)
     message("-- Dynamic tensorflow lite library found, using for ArmNN build")
