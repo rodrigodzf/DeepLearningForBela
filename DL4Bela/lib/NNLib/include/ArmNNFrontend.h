@@ -81,7 +81,7 @@ public:
 
         if (ret == armnn::Status::Failure)
         {
-            LOG(ERROR) << "Failed to perform inference.";
+            NN_LOG(ERROR) << "Failed to perform inference.";
             return false;
         }
 

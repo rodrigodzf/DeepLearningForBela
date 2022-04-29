@@ -12,7 +12,16 @@ if (ENABLE_RTNEURAL_FRONTEND)
     list(APPEND SRC_FILES RTNeuralFrontend.cpp)
 endif()
 
+if (ENABLE_PYTORCH_FRONTEND)
+    list(APPEND SRC_FILES PytorchFrontend.cpp)
+endif()
+
 add_library(${LIB_NAME} ${SRC_FILES})
+
+if (ENABLE_PYTORCH_FRONTEND)
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${TORCH_CXX_FLAGS}")
+    target_link_libraries(${LIB_NAME} PUBLIC ${TORCH_LIBRARIES})
+endif()
 
 if (ENABLE_TFLITE_FRONTEND)
     ## Add TfLite dependency

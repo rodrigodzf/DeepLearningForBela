@@ -31,47 +31,47 @@ bool ArmNNFrontend::load(const std::string &filename)
     // Construct ArmNN network
     if (isTFLite)
     {
-        LOG(INFO) << "Loading TFLite Model " << filename;
+        NN_LOG(INFO) << "Loading TFLite Model " << filename;
         armnnTfLiteParser::ITfLiteParser::TfLiteParserOptions tfLiteParserOptions;
         tfLiteParserOptions.m_InferAndValidate = true;
 
         auto parser = armnnTfLiteParser::ITfLiteParser::Create(tfLiteParserOptions);
         network = parser->CreateNetworkFromBinaryFile(filename.c_str());
-        LOG(INFO) << "Loaded: " << filename;
+        NN_LOG(INFO) << "Loaded: " << filename;
 
         auto inputTensorNames = parser->GetSubgraphInputTensorNames(0);
         auto outputTensorNames = parser->GetSubgraphOutputTensorNames(0);
         for (auto const &name : inputTensorNames)
         {
-            LOG(INFO) << "Input names " << name;
+            NN_LOG(INFO) << "Input names " << name;
         }
 
         for (auto const &name : outputTensorNames)
         {
-            LOG(INFO) << "output names " << name;
+            NN_LOG(INFO) << "output names " << name;
         }
 
         // Find the binding points for the input and output nodes
         mInputBindingInfo = parser->GetNetworkInputBindingInfo(0, inputTensorNames[0]);
         mOutputBindingInfo = parser->GetNetworkOutputBindingInfo(0, outputTensorNames[0]);
 
-        LOG(INFO) << "Input shape " << mInputBindingInfo.second.GetShape();
-        LOG(INFO) << "Output shape " << mOutputBindingInfo.second.GetShape();
+        NN_LOG(INFO) << "Input shape " << mInputBindingInfo.second.GetShape();
+        NN_LOG(INFO) << "Output shape " << mOutputBindingInfo.second.GetShape();
 
-        LOG(INFO) << "Binding points set";
+        NN_LOG(INFO) << "Binding points set";
     }
     else
     {
-        LOG(INFO) << "Loading ONNX Model " << filename;
+        NN_LOG(INFO) << "Loading ONNX Model " << filename;
         auto parser = armnnOnnxParser::IOnnxParser::Create();
         network = parser->CreateNetworkFromBinaryFile(filename.c_str());
-        LOG(INFO) << "Loaded: " << filename;
+        NN_LOG(INFO) << "Loaded: " << filename;
 
         // Find the binding points for the input and output nodes
         mInputBindingInfo = parser->GetNetworkInputBindingInfo("input");
         mOutputBindingInfo = parser->GetNetworkOutputBindingInfo("output");
 
-        LOG(INFO) << "Binding points set";
+        NN_LOG(INFO) << "Binding points set";
     }
 
     // Optimize the network for a specific runtime compute device, e.g. CpuAcc, GpuAcc
@@ -102,18 +102,18 @@ bool ArmNNFrontend::load(const std::string &filename)
         std::exit(1);
     }
 
-    LOG(INFO) << "Optimized";
+    NN_LOG(INFO) << "Optimized";
 
     // Load the optimized network onto the runtime device
     std::string errorMessage;
     if (Status::Success != mRuntime->LoadNetwork(mNetworkIdentifier, std::move(optNet), errorMessage))
     {
-        LOG(ERROR) << errorMessage;
+        NN_LOG(ERROR) << errorMessage;
         std::exit(1);
         return false;
     }
 
-    LOG(INFO) << "Network loaded";
+    NN_LOG(INFO) << "Network loaded";
 
     // pre-allocate memory for output (the size of it never changes)
     // mOutputBuffer.assign(mOutputBindingInfo.second.GetNumElements(), 0);

@@ -3,8 +3,7 @@
 #include "Log.h"
 
 PytorchFrontend::PytorchFrontend()
-{
-}
+{}
 
 PytorchFrontend::~PytorchFrontend()
 {
@@ -17,16 +16,20 @@ void PytorchFrontend::printDebug()
 
 bool PytorchFrontend::load(const std::string &filename)
 {
-
+    c10::InferenceMode guard;
+    torch::jit::setGraphExecutorOptimize(false);
+    torch::jit::getProfilingMode() = false;
     try
     {
         // Deserialize the ScriptModule from a file using torch::jit::load().
-        module = torch::jit::load(filename);
+        mModule = torch::jit::load(filename);
+        mModule.eval();
+
     }
-    catch (const c10::Error &e)
+    catch (const std::exception &e)
     {
-        std::cerr << "error loading the model\n";
-        return -1;
+        NN_LOG(ERROR) << "error loading the model";
+        std::exit(1);
     }
 
     // debug
