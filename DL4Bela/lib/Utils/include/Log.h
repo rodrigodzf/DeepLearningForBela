@@ -17,4 +17,4 @@ namespace Utils
 
 } // namespace Utils
 
-#define LOG(severity) Utils::Log(#severity).Stream()
+#define NN_LOG(severity) Utils::Log(#severity).Stream()

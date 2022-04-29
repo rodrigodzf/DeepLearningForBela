@@ -35,9 +35,18 @@ find_library(MATHNEON_LIB REQUIRED
     HINTS "${CMAKE_SYSROOT}/usr/lib"
 )
 
-set(ENABLE_TFLITE_FRONTEND ON CACHE BOOL "ENABLE_TFLITE_FRONTEND" FORCE)
+set(ENABLE_PYTORCH_FRONTEND ON CACHE BOOL "ENABLE_ARMNN_FRONTEND" FORCE)
+# set(ENABLE_TFLITE_FRONTEND ON CACHE BOOL "ENABLE_TFLITE_FRONTEND" FORCE)
 # set(ENABLE_ARMNN_FRONTEND ON CACHE BOOL "ENABLE_ARMNN_FRONTEND" FORCE)
 # set(ENABLE_RTNEURAL_FRONTEND ON CACHE BOOL "ENABLE_RTNEURAL_FRONTEND" FORCE)
+
+if(ENABLE_PYTORCH_FRONTEND)
+    add_compile_definitions(ENABLE_PYTORCH_FRONTEND)
+    # find pytorch
+    # -DCMAKE_PREFIX_PATH=/absolute/path/to/libtorch
+    list(APPEND CMAKE_PREFIX_PATH /opt/pytorch-install)
+    find_package(Torch REQUIRED)
+endif()
 
 if(ENABLE_TFLITE_FRONTEND)
     add_compile_definitions(ENABLE_TFLITE_FRONTEND)
@@ -78,6 +87,7 @@ add_subdirectory(DL4Bela/lib/NNLib)
 
 add_subdirectory(DL4Bela/samples/wavetable)
 add_subdirectory(DL4Bela/samples/benchmark)
+add_subdirectory(DL4Bela/samples/torchsample)
 
 if(ENABLE_ARMNN_FRONTEND)
     add_subdirectory(DL4Bela/samples/keyword)

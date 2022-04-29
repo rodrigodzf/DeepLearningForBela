@@ -9,7 +9,9 @@
 #include "argparse.h"
 #include "Log.h"
 
-#if defined(ENABLE_TFLITE_FRONTEND)
+#if defined(ENABLE_PYTORCH_FRONTEND)
+#include "PytorchFrontend.h"
+#elif defined(ENABLE_TFLITE_FRONTEND)
 #include "TFLiteFrontend.h"
 #elif defined(ENABLE_ARMNN_FRONTEND)
 #include "ArmNNFrontend.h"
@@ -49,8 +51,8 @@ int main(int argc, char *argv[])
     }
     catch (const std::runtime_error &err)
     {
-        LOG(ERROR) << err.what();
-        LOG(ERROR) << program;
+        NN_LOG(ERROR) << err.what();
+        NN_LOG(ERROR) << program;
         std::exit(1);
     }
 
@@ -61,31 +63,34 @@ int main(int argc, char *argv[])
     bool useTFLiteArmNNDelegate = program["--tflite_with_armnn_delegate"] == true;
     bool writeDebug = program["--write_debug"] == true;
 
-    LOG(INFO) << "Model name " << modelName;
-    LOG(INFO) << "Sequence lenght " << sequenceLenght;
+    NN_LOG(INFO) << "Model name " << modelName;
+    NN_LOG(INFO) << "Sequence lenght " << sequenceLenght;
 
-#if defined(ENABLE_TFLITE_FRONTEND)
-    LOG(INFO) << "Creating TFLite pipeline";
+#if defined(ENABLE_PYTORCH_FRONTEND)
+    NN_LOG(INFO) << "Creating Pytorch pipeline";
+    PytorchFrontend nn;
+#elif defined(ENABLE_TFLITE_FRONTEND)
+    NN_LOG(INFO) << "Creating TFLite pipeline";
     if (useTFLiteArmNNDelegate)
     {
-        LOG(INFO) << "With ArmNN delegate";
+        NN_LOG(INFO) << "With ArmNN delegate";
     }
     auto nn = std::make_unique<TFLiteFrontend>(useTFLiteArmNNDelegate);
 #elif defined(ENABLE_ARMNN_FRONTEND)
-    LOG(INFO) << "Creating ArmNN pipeline";
+    NN_LOG(INFO) << "Creating ArmNN pipeline";
     auto nn = std::make_unique<ArmNNFrontend>();
 #elif defined(ENABLE_RTNEURAL_FRONTEND)
-    LOG(INFO) << "Creating RTNeural pipeline";
+    NN_LOG(INFO) << "Creating RTNeural pipeline";
     auto nn = std::make_unique<RTNeuralFrontend>();
 #endif
 
-    if (!nn)
-    {
-        LOG(ERROR) << "Could not create the frontend";
-        std::exit(1);
-    }
+    // if (!nn)
+    // {
+        // NN_LOG(ERROR) << "Could not create the frontend";
+        // std::exit(1);
+    // }
 
-    nn->load(modelName);
+    nn.load(modelName);
 
     std::vector<float> in = Utils::linspace(-1.0F, 1.0F, sequenceLenght);
     std::vector<float> out(sequenceLenght, 0);
@@ -94,19 +99,19 @@ int main(int argc, char *argv[])
     for (unsigned int i = 0; i < iterations; i++)
     {
         const auto start_time = std::chrono::high_resolution_clock::now();
-        nn->process(in, out);
+        nn.process(in, out);
         const auto duration = std::chrono::duration<double, std::milli>(std::chrono::high_resolution_clock::now() - start_time);
         durations.push_back(duration.count());
     }
 
     for (unsigned int i = 0; i < 10; i++)
     {
-        LOG(INFO) << std::fixed << std::setprecision(3) << "In: " << in[i] << "    Out: " << out[i];
+        NN_LOG(INFO) << std::fixed << std::setprecision(3) << "In: " << in[i] << "    Out: " << out[i];
     }
 
     float average = std::accumulate(std::begin(durations), std::end(durations), 0.0) / durations.size();
 
-    LOG(INFO) << "Inference done, in average after " << iterations << " iterations :" << std::fixed << average << "ms";
+    NN_LOG(INFO) << "Inference done, in average after " << iterations << " iterations :" << std::fixed << average << "ms";
 
     if (writeDebug)
     {

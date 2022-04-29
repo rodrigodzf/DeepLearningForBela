@@ -17,9 +17,15 @@
 #include <algorithm>
 #include "Wavetable.h"
 
-#include "BaseNN.h"
-#include "ArmNNFrontend.h"
+#if defined(ENABLE_PYTORCH_FRONTEND)
+#include "PytorchFrontend.h"
+#elif defined(ENABLE_TFLITE_FRONTEND)
 #include "TFLiteFrontend.h"
+#elif defined(ENABLE_ARMNN_FRONTEND)
+#include "ArmNNFrontend.h"
+#elif defined(ENABLE_RTNEURAL_FRONTEND)
+#include "RTNeuralFrontend.h"
+#endif
 #include "AppOptions.h"
 #include "Log.h"
 
@@ -33,7 +39,16 @@ Wavetable gSawtoothOscillator;
 // Oscillator objects
 
 // ArmNNFrontend
-std::unique_ptr<BaseNN> nn;
+#if defined(ENABLE_PYTORCH_FRONTEND)
+    std::unique_ptr<PytorchFrontend> nn;
+#elif defined(ENABLE_TFLITE_FRONTEND)
+    std::unique_ptr<TFLiteFrontend> nn;
+#elif defined(ENABLE_ARMNN_FRONTEND)
+    std::unique_ptr<ArmNNFrontend> nn;
+#elif defined(ENABLE_RTNEURAL_FRONTEND)
+    std::unique_ptr<RTNeuralFrontend> nn;
+#endif
+
 
 // buffers
 std::vector<float> gIn;
@@ -43,9 +58,9 @@ bool setup(BelaContext *context, void *userData)
 {
     AppOptions *opts = reinterpret_cast<AppOptions *>(userData);
 
-    LOG(INFO) << "Block size: " << context->audioFrames;
-    LOG(INFO) << "Sample rate: " << context->audioSampleRate;
-    LOG(INFO) << "Wavetable size: " << opts->wavetableSize;
+    NN_LOG(INFO) << "Block size: " << context->audioFrames;
+    NN_LOG(INFO) << "Sample rate: " << context->audioSampleRate;
+    NN_LOG(INFO) << "Wavetable size: " << opts->wavetableSize;
 
     std::vector<float> wavetable;
     wavetable.resize(opts->wavetableSize);
@@ -58,34 +73,24 @@ bool setup(BelaContext *context, void *userData)
     // Initialise the sawtooth wavetable, passing the sample rate and the buffer
     gSawtoothOscillator.setup(context->audioSampleRate, wavetable);
 
-    // Set up ArmNNFrontend
-    switch (opts->frontend)
-    {
-    case 0:
-#if defined(ENABLE_TFLITE_FRONTEND)
-        LOG(INFO) << "Creating TFLite pipeline";
-        nn = std::make_unique<TFLiteFrontend>(false);
+    // Set up frontend
+#if defined(ENABLE_PYTORCH_FRONTEND)
+    NN_LOG(INFO) << "Creating TFLite pipeline";
+    nn = std::make_unique<PytorchFrontend>();
+#elif defined(ENABLE_TFLITE_FRONTEND)
+    NN_LOG(INFO) << "Creating TFLite pipeline";
+    nn = std::make_unique<TFLiteFrontend>(false);
+#elif defined(ENABLE_ARMNN_FRONTEND)
+    NN_LOG(INFO) << "Creating ArmNN pipeline";
+    nn = std::make_unique<ArmNNFrontend>();
+#elif defined(ENABLE_RTNEURAL_FRONTEND)
+    NN_LOG(INFO) << "Creating RTNeural pipeline";
+    nn = std::make_unique<RTNeuralFrontend>();
 #endif
-        break;
-    case 1:
-#if defined(ENABLE_ARMNN_FRONTEND)
-        LOG(INFO) << "Creating ArmNN pipeline";
-        nn = std::make_unique<ArmNNFrontend>();
-#endif
-        break;
-    case 2:
-#if defined(ENABLE_RTNEURAL_FRONTEND)
-        LOG(INFO) << "Creating RTNeural pipeline";
-        nn = std::make_unique<RTNeuralFrontend>();
-#endif
-        break;
-    default:
-        break;
-    }
 
     if (!nn)
     {
-        LOG(ERROR) << "Could not create the frontend";
+        NN_LOG(ERROR) << "Could not create the frontend";
         std::exit(1);
     }
 
