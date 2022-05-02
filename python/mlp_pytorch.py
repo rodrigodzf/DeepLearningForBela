@@ -67,3 +67,15 @@ torch.onnx.export(model,                       # model being run
                   # do_constant_folding=True,  # whether to execute constant folding for optimization
                   input_names = ['input'],     # the model's input names
                   output_names = ['output'])   # the model's output names
+# %%
+# https://pytorch.org/tutorials/recipes/mobile_perf.html
+from torch.utils.mobile_optimizer import optimize_for_mobile
+
+# export as torchscript
+sm = torch.jit.script(model)
+sm.save("mlp1024.pt")
+
+torch.quantization.fuse_modules(model, [["linear.0", "linear.1"], ["linear.2", "linear.3"]], inplace=True)
+optimized_model = optimize_for_mobile(sm)
+torch.jit.save(optimized_model, "mlp1024_optim.pt")
+
