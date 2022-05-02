@@ -32,10 +32,6 @@ int main(int argc, char *argv[])
         .default_value(false)
         .implicit_value(true);
 
-    program.add_argument("-f", "--frontend")
-        .required()
-        .default_value(0)
-        .scan<'i', int>();
 
     program.add_argument("--write_debug")
         .default_value(false)
@@ -58,7 +54,7 @@ int main(int argc, char *argv[])
 
     auto modelName = program.get<std::string>("-m");
     int sequenceLenght = program.get<int>("sequence_lenght");
-    int frontend = program.get<int>("frontend");
+    // int frontend = program.get<int>("frontend");
     unsigned int iterations = program.get<int>("average_iterations");
     bool useTFLiteArmNNDelegate = program["--tflite_with_armnn_delegate"] == true;
     bool writeDebug = program["--write_debug"] == true;
@@ -75,13 +71,13 @@ int main(int argc, char *argv[])
     {
         NN_LOG(INFO) << "With ArmNN delegate";
     }
-    auto nn = std::make_unique<TFLiteFrontend>(useTFLiteArmNNDelegate);
+    TFLiteFrontend nn(useTFLiteArmNNDelegate);
 #elif defined(ENABLE_ARMNN_FRONTEND)
     NN_LOG(INFO) << "Creating ArmNN pipeline";
-    auto nn = std::make_unique<ArmNNFrontend>();
+    ArmNNFrontend nn;
 #elif defined(ENABLE_RTNEURAL_FRONTEND)
     NN_LOG(INFO) << "Creating RTNeural pipeline";
-    auto nn = std::make_unique<RTNeuralFrontend>();
+    RTNeuralFrontend nn;
 #endif
 
     // if (!nn)
