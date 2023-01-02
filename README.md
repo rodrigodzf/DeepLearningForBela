@@ -16,7 +16,8 @@ To build the included samples and libraries with cmake use:
 
 ```bash
 cmake -S . -B build -DCMAKE_TOOLCHAIN_FILE=Toolchain.cmake
-cmake --build 
+cd build
+cmake --build .
 ```
 
 ## Samples
