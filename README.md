@@ -25,6 +25,8 @@ cmake --build .
 The samples assume you have a pretrained network exported in the `.tflite` or `.onnx` formats. There are some python scripts included that can be used to train and export such networks.
 
 wavetable - This is a simple generator that feds a sawtooth (or a sine) wave to a neural network. It is meant to be used in combination with a MLP and a TCN.
+linear - This is a simple linear Tensorflow Lite model. This sample does not use any of the frontends provided. The model can be generated using [this code](https://github.com/pelinski/bela-tflite-example/blob/main/python/model.ipynb).
+
 <!-- threaded - A threaded sample that shows how to run inference neural network on a separate thread  -->
 
 ## Frontend and backend selection
@@ -37,7 +39,7 @@ Currently, the following frontends are available:
 - ArmNN
 - RTNeural
 
-Each Frontend supports different formats and also different options for optimization and backend selection. 
+Each Frontend supports different formats and also different options for optimization and backend selection.
 
 ### Tensorflow Lite
 
@@ -47,7 +49,7 @@ ArmNN also provides a custom delegate that can be used with TFLite.
 
 ### ArmNN
 
-ArmNN provides 3 backends: CpuRef, CpuAcc and GpuAcc. However, is is also possible to [implement custom backends](https://arm-software.github.io/armnn/20.02/backends.xhtml). 
+ArmNN provides 3 backends: CpuRef, CpuAcc and GpuAcc. However, is is also possible to [implement custom backends](https://arm-software.github.io/armnn/20.02/backends.xhtml).
 
 ### RTNeural
 
