@@ -25,7 +25,7 @@ cmake --build .
 The samples assume you have a pretrained network exported in the `.tflite` or `.onnx` formats. There are some python scripts included that can be used to train and export such networks.
 
 wavetable - This is a simple generator that feds a sawtooth (or a sine) wave to a neural network. It is meant to be used in combination with a MLP and a TCN.
-linear - This is a simple linear Tensorflow Lite model. This sample does not use any of the frontends provided. The model can be generated using [this code](https://github.com/pelinski/bela-tflite-example/blob/main/python/model.ipynb).
+linear - This is a simple linear Tensorflow Lite model. This sample does not use any of the frontends provided. The model can be generated using [this code](https://github.com/pelinski/bela-tflite-example/blob/main/python/model.ipynb) or downloaded from [here](https://github.com/pelinski/bela-tflite-example/blob/main/bela-tflite-linear/model.tflite).
 
 <!-- threaded - A threaded sample that shows how to run inference neural network on a separate thread  -->
 
