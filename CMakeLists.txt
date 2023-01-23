@@ -56,13 +56,4 @@ add_subdirectory(DL4Bela/lib/NNLib)
 
 add_subdirectory(DL4Bela/samples/wavetable)
 add_subdirectory(DL4Bela/samples/benchmark)
-
-# add_subdirectory(Utils)
-# add_subdirectory(NNLib)
-# add_subdirectory(simpleRTNeural)
-# add_subdirectory(final_project)
-# add_subdirectory(test_tflite_delegate)
-# add_subdirectory(test_onnx)
-# add_subdirectory(test_tflite)
-# add_subdirectory(assignment2)
-# add_subdirectory(midi-sinetone)
+#add_subdirectory(DL4Bela/samples/linear) # comment the previous 4 lines and uncomment this one to build the linear example
